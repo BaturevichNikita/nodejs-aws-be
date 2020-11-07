@@ -2,6 +2,7 @@ import { APIGatewayProxyResult } from 'aws-lambda';
 
 enum Statuses {
     success = 200,
+    invalidData = 400,
     error = 500,
 }
 
@@ -20,7 +21,11 @@ export default class Response {
         return this.send(Statuses.success, data);
     }
 
-    static error(message: string): APIGatewayProxyResult {
+    static internalError(message: string): APIGatewayProxyResult {
         return this.send(Statuses.error, message);
+    }
+
+    static invalidDataError(message: string): APIGatewayProxyResult {
+        return this.send(Statuses.invalidData, message);
     }
 }
