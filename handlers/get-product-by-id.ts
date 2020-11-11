@@ -1,20 +1,21 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { findOneProductByID } from '../services/product-service';
+import { Product } from '../models';
 import { Response } from '../utils';
 
 const GetProductByID = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
-        const id = +event.pathParameters.productID;
+        console.log('GET PRODUCT BY ID');
+        console.log('Parameters: ', event.pathParameters);
 
-        if (isNaN(id)) throw new Error('ID is not a number!');
+        const { productID } = event.pathParameters;
 
-        const product = await findOneProductByID(id);
+        const product = await Product.FindOneByID(productID);
 
-        if (!product) throw new Error(`Product with id = ${id} does not exist!`);
+        if (!product) throw `Product with id = ${productID} does not exist!`;
 
         return Response.success(product);
     } catch (err) {
-        return Response.error(err.message);
+        return Response.internalError(err.message);
     }
 };
 

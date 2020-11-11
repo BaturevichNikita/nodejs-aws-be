@@ -1,13 +1,15 @@
 import { APIGatewayProxyResult } from 'aws-lambda';
-import { findAllProducts } from '../services/product-service';
+import { Product } from '../models';
 import { Response } from '../utils';
 
 const GetProducts = async (): Promise<APIGatewayProxyResult> => {
     try {
-        const products = await findAllProducts();
+        console.log('GET ALL PRODUCTS');
+
+        const products = await Product.FindAll();
         return Response.success(products);
     } catch (err) {
-        return Response.error(err.message);
+        return Response.internalError(err.message);
     }
 };
 
