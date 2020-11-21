@@ -1,6 +1,6 @@
-import { APIGatewayProxyEvent, APIGatewayProxyHandler } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyHandler, SQSEvent, SQSHandler } from 'aws-lambda';
 import 'source-map-support/register';
-import { GetProductByID, GetProducts, CreateProduct } from './handlers';
+import { GetProductByID, GetProducts, CreateProduct, CatalogBatchProcess } from './handlers';
 
 const getAllProducts: APIGatewayProxyHandler = async () => GetProducts();
 
@@ -8,4 +8,6 @@ const getProductByID: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 
 const createNewProduct: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent) => CreateProduct(event);
 
-export { getAllProducts, getProductByID, createNewProduct };
+const catalogBatchProcess: SQSHandler = async (event: SQSEvent) => CatalogBatchProcess(event);
+
+export { getAllProducts, getProductByID, createNewProduct, catalogBatchProcess };
