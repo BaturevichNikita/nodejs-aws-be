@@ -8,6 +8,7 @@ export default class Product {
         'select p.*, s.count from products p left join stocks s on p.id = s.product_id';
     static insertProductsQuery = 'insert into products (title, description, price) values ($1, $2, $3) returning id';
     static insertStockQuery = 'insert into stocks (product_id, count) values ($1, $2)';
+    static findByTitleQuery = 'select * from products p where p.title = $1';
 
     static productSchema = Joi.object({
         title: Joi.string().required(),
@@ -56,6 +57,13 @@ export default class Product {
 
         let productID = null;
 
+        const { rows: existRecords } = await client.query(this.findByTitleQuery, [product.title]);
+        if (existRecords.length) {
+            console.log(`Record with title = ${product.title} exists!`);
+            await client.end();
+            return;
+        }
+
         try {
             await client.query('BEGIN');
             const { rows } = await client.query(this.insertProductsQuery, [
@@ -72,10 +80,10 @@ export default class Product {
             productID = id;
         } catch (error) {
             console.log(error.message);
-            client.query('ROLLBACK');
+            await client.query('ROLLBACK');
         } finally {
             await client.end();
-            return productID;
         }
+        return productID;
     }
 }

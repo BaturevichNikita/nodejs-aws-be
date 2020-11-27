@@ -11,7 +11,7 @@ const GetProductByID = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
         const product = await Product.FindOneByID(productID);
 
-        if (!product) throw `Product with id = ${productID} does not exist!`;
+        if (!product) throw new Error(`Product with id = ${productID} does not exist!`);
 
         return Response.success(product);
     } catch (err) {

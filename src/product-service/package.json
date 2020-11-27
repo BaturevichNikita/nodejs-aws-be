@@ -7,10 +7,11 @@
         "test": "jest"
     },
     "dependencies": {
-        "pg": "^8.4.2",
-        "@types/pg": "^7.14.6",
-        "joi": "^17.3.0",
         "@types/joi": "^14.3.4",
+        "@types/pg": "^7.14.6",
+        "aws-sdk": "^2.796.0",
+        "joi": "^17.3.0",
+        "pg": "^8.4.2",
         "source-map-support": "^0.5.10"
     },
     "devDependencies": {

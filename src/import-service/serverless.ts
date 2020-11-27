@@ -2,7 +2,7 @@ import type { Serverless } from 'serverless/aws';
 
 const serverlessConfiguration: Serverless = {
     service: {
-        name: 'import-service',
+        name: 'import-service-be',
     },
     frameworkVersion: '2',
     custom: {
@@ -23,6 +23,9 @@ const serverlessConfiguration: Serverless = {
             AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
             BUCKET: process.env.BUCKET,
             UPLOAD_FOLDER: process.env.UPLOAD_FOLDER,
+            SQS_URL: {
+                'Fn::ImportValue': 'SQSQueueUrl',
+            },
         },
         iamRoleStatements: [
             {
@@ -34,6 +37,13 @@ const serverlessConfiguration: Serverless = {
                 Effect: 'Allow',
                 Action: 's3:*',
                 Resource: 'arn:aws:s3:::${self:provider.environment.BUCKET}/*',
+            },
+            {
+                Effect: 'Allow',
+                Action: 'sqs:*',
+                Resource: {
+                    'Fn::ImportValue': 'SQSQueueArn',
+                },
             },
         ],
     },

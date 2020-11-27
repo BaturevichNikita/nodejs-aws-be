@@ -26,7 +26,26 @@ const serverlessConfiguration: Serverless = {
             PG_PASSWORD: process.env.PG_PASSWORD,
             PG_DB_NAME: process.env.PG_DB_NAME,
             PG_PORT: process.env.PG_PORT,
+            SNS_ARN: {
+                Ref: 'SNSTopic',
+            },
         },
+        iamRoleStatements: [
+            {
+                Effect: 'Allow',
+                Action: 'sqs:*',
+                Resource: {
+                    'Fn::GetAtt': ['SQSQueue', 'Arn'],
+                },
+            },
+            {
+                Effect: 'Allow',
+                Action: 'sns:*',
+                Resource: {
+                    Ref: 'SNSTopic',
+                },
+            },
+        ],
     },
     functions: {
         getAllProducts: {
@@ -64,6 +83,82 @@ const serverlessConfiguration: Serverless = {
                     },
                 },
             ],
+        },
+        catalogBatchProcess: {
+            handler: 'handler.catalogBatchProcess',
+            events: [
+                {
+                    sqs: {
+                        batchSize: 5,
+                        arn: {
+                            'Fn::GetAtt': ['SQSQueue', 'Arn'],
+                        },
+                    },
+                },
+            ],
+        },
+    },
+
+    resources: {
+        Resources: {
+            SQSQueue: {
+                Type: 'AWS::SQS::Queue',
+                Properties: {
+                    QueueName: 'catalogItemsQueue.fifo',
+                    ContentBasedDeduplication: true,
+                    FifoQueue: true,
+                },
+            },
+            SNSTopic: {
+                Type: 'AWS::SNS::Topic',
+                Properties: {
+                    TopicName: 'createProductTopic',
+                },
+            },
+            SNSSubscriptionSuccess: {
+                Type: 'AWS::SNS::Subscription',
+                Properties: {
+                    FilterPolicy: {
+                        status: ['success'],
+                    },
+                    Endpoint: 'baturevichnike@gmail.com',
+                    Protocol: 'email',
+                    TopicArn: {
+                        Ref: 'SNSTopic',
+                    },
+                },
+            },
+            SNSSubscriptionError: {
+                Type: 'AWS::SNS::Subscription',
+                Properties: {
+                    FilterPolicy: {
+                        status: ['error'],
+                    },
+                    Endpoint: 'pippin210294@gmail.com',
+                    Protocol: 'email',
+                    TopicArn: {
+                        Ref: 'SNSTopic',
+                    },
+                },
+            },
+        },
+        Outputs: {
+            SQSQueueUrl: {
+                Value: {
+                    Ref: 'SQSQueue',
+                },
+                Export: {
+                    Name: 'SQSQueueUrl',
+                },
+            },
+            SQSQueueArn: {
+                Value: {
+                    'Fn::GetAtt': ['SQSQueue', 'Arn'],
+                },
+                Export: {
+                    Name: 'SQSQueueArn',
+                },
+            },
         },
     },
 };
