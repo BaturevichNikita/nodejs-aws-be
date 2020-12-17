@@ -7,6 +7,7 @@ import {
   Req,
   Inject,
   CACHE_MANAGER,
+  All,
 } from '@nestjs/common';
 import Axios, { AxiosRequestConfig } from 'axios';
 import { Cache } from 'cache-manager';
@@ -18,7 +19,7 @@ const cacheKey = 'products';
 export class AppController {
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
-  @Get('*')
+  @All()
   async getProducts(@Req() req: Request, @Res() res: Response): Promise<void> {
     const [_, recipient, ...rest] = req.url.split('/');
     const recipientURL = process.env[recipient];
